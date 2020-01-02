@@ -26,6 +26,7 @@ class Download:
         if not force and p.is_file():
             logging.info(f'file exists: {self.filename}')
             return
+        logging.info(f'download: {self.url}')
         r = requests.get(self.url, **self.kwargs)
         with p.open('wb') as f:
             f.write(r.content)
@@ -43,9 +44,18 @@ def proficient(subject: str, year: int) -> Download:
     )
 
 
+def graduation(year: int) -> Download:
+    years = f'{year - 1}-{year % 100}'
+    url = f'https://nces.ed.gov/ccd/tables/xls/ACGR_RE_Characteristics_{years}.xlsx'
+    # TODO: Convert XLS to CSV.
+    return Download(url, filename=f'data/grad{year}.csv')
+
+
 logging.basicConfig(level=logging.INFO)
 Path('data').mkdir(exist_ok=True)
 math2017 = proficient('math', 2017)
 math2017.download()
 read2017 = proficient('rla', 2017)
 read2017.download()
+grad2017 = graduation(2017)
+grad2017.download()
