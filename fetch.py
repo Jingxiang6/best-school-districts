@@ -32,30 +32,47 @@ class Download:
             f.write(r.content)
 
 
-def proficient(subject: str, year: int) -> Download:
-    years = f'{year - 1}-{year % 100}'
-    url = f'https://www2.ed.gov/about/inits/ed/edfacts/data-files/{subject}-achievement-lea-sy{years}.csv'
-    # ed.gov does not send the full certificate chain, so I had to build it
-    # myself.
-    return Download(
-        url,
-        filename=f'data/{subject}{year}.csv',
-        verify='SectigoRSADomainValidationSecureServerCA.pem'
-    )
+class Data:
 
+    def __init__(self, directory='data'):
+        self.directory = directory
 
-def graduation(year: int) -> Download:
-    years = f'{year - 1}-{year % 100}'
-    url = f'https://nces.ed.gov/ccd/tables/xls/ACGR_RE_Characteristics_{years}.xlsx'
-    # TODO: Convert XLS to CSV.
-    return Download(url, filename=f'data/grad{year}.csv')
+    def proficient(self, subject: str, year: int) -> Download:
+        years = f'{year - 1}-{year % 100}'
+        url = f'https://www2.ed.gov/about/inits/ed/edfacts/data-files/{subject}-achievement-lea-sy{years}.csv'
+        # ed.gov does not send the full certificate chain, so I had to build it
+        # myself.
+        return Download(
+            url,
+            filename=f'{self.directory}/{subject}{year}.csv',
+            verify='SectigoRSADomainValidationSecureServerCA.pem'
+        )
+
+    def graduation(self, year: int) -> Download:
+        years = f'{year - 1}-{year % 100}'
+        url = f'https://nces.ed.gov/ccd/tables/xls/ACGR_RE_Characteristics_{years}.xlsx'
+        # TODO: Convert XLS to CSV.
+        return Download(url, filename=f'{self.directory}/grad{year}.csv')
+
+    # College Admissions Test
+    def cat_tx(self, test: str, year: int) -> Download:
+        url = f'https://tea.texas.gov/acctres/{test}_district_data_class_{year}'
+        return Download(url, filename=f'{self.directory}/{test}-{year}-tx.csv')
+
+    def download(self):
+        Path(self.directory).mkdir(exist_ok=True)
+        math2017 = self.proficient('math', 2017)
+        math2017.download()
+        read2017 = self.proficient('rla', 2017)
+        read2017.download()
+        grad2017 = self.graduation(2017)
+        grad2017.download()
+        sat2017tx = self.cat_tx('sat', 2017)
+        sat2017tx.download()
+        act2017tx = self.cat_tx('act', 2017)
+        act2017tx.download()
 
 
 logging.basicConfig(level=logging.INFO)
-Path('data').mkdir(exist_ok=True)
-math2017 = proficient('math', 2017)
-math2017.download()
-read2017 = proficient('rla', 2017)
-read2017.download()
-grad2017 = graduation(2017)
-grad2017.download()
+data = Data()
+data.download()
