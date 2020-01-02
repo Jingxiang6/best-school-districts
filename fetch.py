@@ -38,6 +38,8 @@ class Data:
         self.directory = directory
 
     def proficient(self, subject: str, year: int) -> Download:
+        """Download data on state assessments of proficiency."""
+        # https://www2.ed.gov/about/inits/ed/edfacts/data-files/index.html
         years = f'{year - 1}-{year % 100}'
         url = f'https://www2.ed.gov/about/inits/ed/edfacts/data-files/{subject}-achievement-lea-sy{years}.csv'
         # ed.gov does not send the full certificate chain, so I had to build it
@@ -49,13 +51,16 @@ class Data:
         )
 
     def graduation(self, year: int) -> Download:
+        """Download data on graduation rates."""
+        # https://nces.ed.gov/ccd/tables/ACGR_RE_and_characteristics_2016-17.asp
         years = f'{year - 1}-{year % 100}'
         url = f'https://nces.ed.gov/ccd/tables/xls/ACGR_RE_Characteristics_{years}.xlsx'
         # TODO: Convert XLS to CSV.
         return Download(url, filename=f'{self.directory}/grad{year}.csv')
 
-    # College Admissions Test
     def cat_tx(self, test: str, year: int) -> Download:
+        """Download data on college admission test scores."""
+        # https://tea.texas.gov/Reports_and_Data/School_Performance/Accountability_Research/College_Admissions_Testing_SAT_and_ACT
         url = f'https://tea.texas.gov/acctres/{test}_district_data_class_{year}'
         return Download(url, filename=f'{self.directory}/{test}-{year}-tx.csv')
 
